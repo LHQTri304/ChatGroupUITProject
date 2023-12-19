@@ -15,6 +15,12 @@ import Messenger from "./Messenger/Messenger"
 
 import AllNotification from "./AllNotification/AllNotification"
 
+import CreatePost from "./EssentialScreens/CreatePost"
+import CreateNotification from "./EssentialScreens/CreateNotification"
+
+import ShowPost from "./EssentialScreens/ShowPost"
+import ShowProfile from "./EssentialScreens/ShowProfile"
+
 export {
     Login,
     Registration,
@@ -27,5 +33,11 @@ export {
     Friends,
     AllNotification,
     Messenger,
-    MessengerGroup
+    MessengerGroup,
+
+    CreatePost,
+    CreateNotification,
+
+    ShowPost,
+    ShowProfile,
 }

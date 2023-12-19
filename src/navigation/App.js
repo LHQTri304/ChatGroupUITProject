@@ -10,6 +10,10 @@ import {
   Messenger,
   MessengerGroup,
   SettingProfile,
+  CreatePost,
+  CreateNotification,
+  ShowPost,
+  ShowProfile,
 } from '../screens';
 import UITab from './UITab';
 
@@ -34,6 +38,12 @@ function App(props) {
         <Stack.Screen name="Messenger" component={Messenger} />
         <Stack.Screen name="MessengerGroup" component={MessengerGroup} />
         <Stack.Screen name="SettingProfile" component={SettingProfile} />
+        
+        <Stack.Screen name="CreatePost" component={CreatePost} />
+        <Stack.Screen name="CreateNotification" component={CreateNotification} />
+        
+        <Stack.Screen name="ShowPost" component={ShowPost} />
+        <Stack.Screen name="ShowProfile" component={ShowProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );
