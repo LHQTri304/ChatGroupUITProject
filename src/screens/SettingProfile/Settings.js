@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -10,6 +10,10 @@ import {
 } from "react-native";
 import { images, colors, fontSizes } from "../../constants";
 import { UIHeader } from "../../components";
+import { API_BASE_URL } from "../../../DomainAPI";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 
 function GroupOption(props) {
   const { text } = props;
@@ -46,39 +50,130 @@ function EachOptionNavigate(props) {
 }
 
 function Settings(props) {
-  //example for api
+  const [fulName, setFulName] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [phoneNumber, setPhoneNumber] = useState(null);
+  const [image, setImage] = useState(null);
+  const [username, setUsername] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+
+  /* //example for api
   const [profile, setProfile] = useState({
     userName: "Dù sớ nèm (👍゜▽゜)👍",
-    imageUrl: "https://i.pravatar.cc/100" /* profile image */,
+    imageUrl: "https://i.pravatar.cc/100"
     phoneNumber: "190010 không thấy",
     email: "aaakm331@gmail.com",
-  });
+  }); */
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const username = await AsyncStorage.getItem("username");
+        setUsername(username);
+
+        const response = await axios.get(
+          API_BASE_URL + "/api/v1/user/GetUser?userName=" + username
+        );
+
+        setFulName(response.data.information.fulName);
+        setEmail(response.data.email);
+        setPhoneNumber(response.data.information.phoneNumber);
+
+        const responseAvatar = await axios.get(
+          API_BASE_URL + "/api/v1/information/getAvatar?userName=" + username
+        );
+
+        setImage(responseAvatar.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Error fetching data");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [props.userName]);
+
+  useEffect(() => {
+    (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+    })();
+  }, []);
+
+  const Logout = async () => {
+    try {
+      await AsyncStorage.removeItem("username");
+      navigate("Login");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
+
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const selectImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+
+      try {
+        const username = await AsyncStorage.getItem("username");
+
+        var imagePath = result.uri.toString();
+
+        const formData = new FormData();
+        formData.append("image", imagePath);
+        formData.append("userName", username);
+
+        const response = await axios.post(
+          API_BASE_URL + "/api/v1/information/changeAvatar",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.status == 200) {
+          console.log(imagePath);
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
+    }
+  };
 
   //function of navigation to/back
   const { navigate, goBack, push } = props.navigation;
 
   return (
     <SafeAreaView style={styles.container}>
-      <UIHeader
-        title={"Tài khoản"}
-      />
+      <UIHeader title={"Tài khoản"} />
 
       <ScrollView>
         <View /* Profile picture */ style={styles.profileView}>
-          <Image
-            source={{ uri: profile.imageUrl }}
-            style={styles.profileImage}
-          />
-          <Text style={styles.profileUsername}>{profile.userName}</Text>
+          <Image source={{ uri: image }} style={styles.profileImage} />
+          <Text style={styles.profileUsername}>{fulName}</Text>
         </View>
 
         <GroupOption text={"Thông tin tài khoản"} />
 
-        <EachOptionViewOnly
-          icon={images.phoneIcon}
-          text={profile.phoneNumber}
-        />
-        <EachOptionViewOnly icon={images.emailIcon} text={profile.email} />
+        <EachOptionViewOnly icon={images.phoneIcon} text={phoneNumber} />
+        <EachOptionViewOnly icon={images.emailIcon} text={email} />
 
         <GroupOption text={"Tùy chỉnh tài khoản"} />
 
@@ -91,12 +186,12 @@ function Settings(props) {
         <EachOptionNavigate
           icon={images.keyIcon}
           text={"Đổi mật khẩu"}
-          onPress={() => navigate("Verification")}
+          onPress={() => navigate('ResetPasswordInSetting')}
         />
         <EachOptionNavigate
           icon={images.exportIcon}
           text={"Đăng xuất"}
-          onPress={() => navigate("Login")}
+          onPress={Logout}
         />
       </ScrollView>
     </SafeAreaView>

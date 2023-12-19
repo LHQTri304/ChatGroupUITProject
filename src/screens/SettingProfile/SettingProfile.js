@@ -12,23 +12,74 @@ import {
 import { images, colors, fontSizes } from "../../constants";
 import { UIHeader } from "../../components";
 import { CommonButton } from "../../components";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "../../../DomainAPI";
+import axios from "axios";
 
 function Settings(props) {
   const [newUsername, setNewUsername] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [newEmail, setNewEmail] = useState("");
-
-  //function of navigation to/back
-  const { navigate, goBack } = props.navigation;
+  const [newYearOfBirth, setNewYearOfBirth] = useState("");
+  const [gender, setGender] = useState("");
 
   const handleSettings = async () => {
-    //đẩy mấy cái new xuống database tại đây
-    alert("Đã đổi thông tin thành công");
+    const username = await AsyncStorage.getItem("username");
+
+    const response = await axios.get(
+      API_BASE_URL + "/api/v1/user/GetUser?userName=" + username
+    );
+
+    let updateInformation = {
+      infoID: response.data.information.infoID,
+      fulName: newUsername,
+      phoneNumber: newPhoneNumber,
+      yearOfBirth: newYearOfBirth,
+      gender: gender,
+    };
+
+    const responseUpdate = await axios.post(
+      API_BASE_URL + "/api/v1/information/updateInformation",
+      updateInformation
+    );
+
+    if (responseUpdate.status == 200) {
+      push("UITab");
+    } else {
+      alert("Error!");
+    }
   };
 
   const handleCancel = async () => {
     navigate("Settings");
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const username = await AsyncStorage.getItem("username");
+
+        const response = await axios.get(
+          API_BASE_URL + "/api/v1/user/GetUser?userName=" + username
+        );
+
+        setNewUsername(response.data.information.fulName);
+        setNewEmail(response.data.email);
+        setNewPhoneNumber(response.data.information.phoneNumber.toString());
+        setNewYearOfBirth(response.data.information.yearOfBirth.toString());
+        setGender(response.data.information.gender);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Error fetching data");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [props.userName]);
+
+  //function of navigation to/back
+  const { navigate, goBack, push } = props.navigation;
 
   return (
     <View style={styles.container}>
@@ -57,7 +108,7 @@ function Settings(props) {
                 <TextInput
                   style={styles.textInputTypingArea}
                   inputMode="text"
-                  onChangeText={setNewUsername}
+                  onChangeText={text => setNewUsername(text)}
                   value={newUsername}
                   placeholder="Nhập tên người dùng mới"
                   placeholderTextColor={colors.noImportantText}
@@ -72,9 +123,8 @@ function Settings(props) {
                   <Text>Số điện thoại:</Text>
                   <TextInput
                     style={styles.textInputTypingArea}
-                    secureTextEntry={true} // * the password
                     inputMode="numeric"
-                    onChangeText={setNewPhoneNumber}
+                    onChangeText={text => setNewPhoneNumber(text)}
                     value={newPhoneNumber}
                     placeholder="Nhập số điện thoại mới"
                     placeholderTextColor={colors.noImportantText}
@@ -92,7 +142,7 @@ function Settings(props) {
                     style={styles.textInputTypingArea}
                     secureTextEntry={true} // * the password
                     inputMode="email"
-                    onChangeText={setNewEmail}
+                    onChangeText={text => setNewEmail(text)}
                     value={newEmail}
                     placeholder="Nhập địa chỉ email mới"
                     placeholderTextColor={colors.noImportantText}
@@ -111,8 +161,14 @@ function Settings(props) {
             </View>
           </View>
 
-          <Image source={images.decorStuff01} style={styles.decorStuffBottomLeft} />
-          <Image source={images.decorStuff02} style={styles.decorStuffBottomRight} />
+          <Image
+            source={images.decorStuff01}
+            style={styles.decorStuffBottomLeft}
+          />
+          <Image
+            source={images.decorStuff02}
+            style={styles.decorStuffBottomRight}
+          />
         </View>
       </ScrollView>
     </View>
@@ -140,7 +196,7 @@ const styles = StyleSheet.create({
   },
   yourInformationText: {
     color: colors.titleScreen,
-    fontSize: fontSizes.h2*0.9,
+    fontSize: fontSizes.h2 * 0.9,
     fontWeight: "bold",
     alignSelf: "center",
   },

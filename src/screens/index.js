@@ -6,6 +6,7 @@ import ResetPassword from "./ResetPassword"
 
 import Settings from "./SettingProfile/Settings"
 import SettingProfile from "./SettingProfile/SettingProfile"
+import ResetPasswordInSetting from "./SettingProfile/ResetPasswordInSetting"
 
 import GroupChat from "./GroupChat/GroupChat"
 import MessengerGroup from "./MessengerGroup/MessengerGroup"
@@ -40,4 +41,5 @@ export {
 
     ShowPost,
     ShowProfile,
+    ResetPasswordInSetting,
 }

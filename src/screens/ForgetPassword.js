@@ -1,23 +1,35 @@
 import React, { useState } from "react";
-import {
-  Text,
-  View,
-  Image,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { Text, View, Image, TextInput, StyleSheet } from "react-native";
 import { images, colors, fontSizes } from "../constants/index";
 import { CommonButton } from "../components";
+import axios from "axios";
+import { API_BASE_URL } from "../../DomainAPI";
 
 const ForgetPassword = (props) => {
   //navigation to/back
   const { navigate, goBack } = props.navigation;
 
   //use for api
+  const [username, setUsername] = useState(".");
   const handleForgetPassword = async () => {
-    navigate("Verification");
+    try {
+      const response = await axios.get(
+        API_BASE_URL + "/api/v1/user/GetRecoveryCode?userName=" + username
+      );
+      if (response.status == 200) {
+        navigate("Verification", {
+          OTP: response.data,
+          userName: username,
+        });
+      } else {
+        alert("Maybe user of this username didn't set email for this account");
+        alert("Please contact us to get more helps");
+      }
+    } catch (Error) {
+      console.error(Error.message);
+    }
   };
-  
+
   return (
     <View style={styles.container}>
       <Image source={images.decorStuff01} style={styles.decorStuffTop} />
@@ -29,15 +41,20 @@ const ForgetPassword = (props) => {
 
         <View style={styles.mainView}>
           <View /* username */ style={styles.textInputView}>
-            <Image source={images.personCircleIcon} style={styles.textInputImage} />
+            <Image
+              source={images.personCircleIcon}
+              style={styles.textInputImage}
+            />
             <View>
               <Text>Tên đăng nhập:</Text>
-            <TextInput
-              style={styles.textInputTypingArea}
-              inputMode="text"
-              placeholder="Nhập tên đăng nhập của bạn"
-              placeholderTextColor={colors.noImportantText}
-            /></View>
+              <TextInput
+                style={styles.textInputTypingArea}
+                inputMode="text"
+                onChangeText={text => setUsername(text)}
+                placeholder="Nhập tên đăng nhập của bạn"
+                placeholderTextColor={colors.noImportantText}
+              />
+            </View>
           </View>
 
           <CommonButton
@@ -57,8 +74,8 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.backgroundWhite,
     flex: 1,
-    justifyContent: 'center', 
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   partitionMiddle: {
     width: "100%",
@@ -72,7 +89,7 @@ const styles = StyleSheet.create({
     color: colors.titleScreen,
     fontSize: fontSizes.h1,
     fontWeight: "bold",
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   mainView: {
     width: "90%",
@@ -83,8 +100,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 50,
     alignSelf: "center",
-    justifyContent: 'center', 
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   textInputView: {
     flexDirection: "row",
@@ -102,7 +119,7 @@ const styles = StyleSheet.create({
   textInputTypingArea: {
     width: 250,
     height: 55,
-    marginTop:5,
+    marginTop: 5,
     paddingLeft: 20,
     borderColor: colors.noImportantText,
     borderWidth: 2,
@@ -112,18 +129,18 @@ const styles = StyleSheet.create({
     width: 250,
     height: 120,
     opacity: 0.5,
-    resizeMode: 'stretch',
-    top: '10%',
+    resizeMode: "stretch",
+    top: "10%",
     left: 0,
-    position: 'absolute',
+    position: "absolute",
   },
   decorStuffBottom: {
     width: 250,
     height: 120,
     opacity: 0.5,
-    resizeMode: 'stretch',
-    bottom: '10%',
+    resizeMode: "stretch",
+    bottom: "10%",
     right: 0,
-    position: 'absolute',
+    position: "absolute",
   },
 });

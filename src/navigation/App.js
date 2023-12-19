@@ -14,6 +14,7 @@ import {
   CreateNotification,
   ShowPost,
   ShowProfile,
+  ResetPasswordInSetting,
 } from '../screens';
 import UITab from './UITab';
 
@@ -23,7 +24,7 @@ function App(props) {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="UITab"
+        initialRouteName="Login"
         screenOptions={{
           headerShown: false,
         }}>
@@ -38,6 +39,7 @@ function App(props) {
         <Stack.Screen name="Messenger" component={Messenger} />
         <Stack.Screen name="MessengerGroup" component={MessengerGroup} />
         <Stack.Screen name="SettingProfile" component={SettingProfile} />
+        <Stack.Screen name="ResetPasswordInSetting" component={ResetPasswordInSetting} />
         
         <Stack.Screen name="CreatePost" component={CreatePost} />
         <Stack.Screen name="CreateNotification" component={CreateNotification} />
